@@ -34,7 +34,7 @@ import tritonclient.http as httpclient
 def main():
     client = httpclient.InferenceServerClient(url="localhost:8000")
 
-    prompt = "Pikachu with a hat, 4k, 3d render"
+    prompt = "a photo of an astronaut riding a horse on mars"
     text_obj = np.array([prompt], dtype="object").reshape((-1, 1))
 
     input_text = httpclient.InferInput("prompt", text_obj.shape,

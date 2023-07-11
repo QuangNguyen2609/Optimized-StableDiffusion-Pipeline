@@ -32,7 +32,7 @@ import triton_python_backend_utils as pb_utils
 from torch import autocast
 from torch.utils.dlpack import to_dlpack, from_dlpack
 from transformers import CLIPTokenizer
-from diffusers import LMSDiscreteScheduler, UNet2DConditionModel
+from diffusers import LMSDiscreteScheduler, UNet2DConditionModel, StableDiffusionPipeline
 from tqdm.auto import tqdm
 
 
@@ -57,6 +57,13 @@ class TritonPythonModel:
             torch_dtype=torch.float16,
             use_auth_token=True,
         ).to("cuda")
+        
+        self.pipe1 = StableDiffusionPipeline.from_pretrained(
+                        "CompVis/stable-diffusion-v1-4", 
+                        use_auth_token=True,
+                        revision="fp16",
+                        torch_dtype=torch.float16
+                    ).to("cuda")
 
     def execute(self, requests):
         responses = []
@@ -153,11 +160,15 @@ class TritonPythonModel:
                                                                  1).numpy()
             decoded_image = (decoded_image * 255).round().astype("uint8")
 
+            # prompt = pb_utils.get_input_tensor_by_name(request, "prompt")
+            print(inp)
+            with torch.inference_mode():
+                final_image = self.pipe1([input_text], num_inference_steps=5).images[0]
             # Sending results
             inference_response = pb_utils.InferenceResponse(output_tensors=[
                 pb_utils.Tensor(
                     "generated_image",
-                    np.array(decoded_image, dtype=self.output_dtype),
+                    np.array(final_image, dtype=self.output_dtype),
                 )
             ])
             responses.append(inference_response)
