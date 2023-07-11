@@ -1,67 +1,6 @@
-<!--
-# Copyright 2022-2023, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
-#
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions
-# are met:
-#  * Redistributions of source code must retain the above copyright
-#    notice, this list of conditions and the following disclaimer.
-#  * Redistributions in binary form must reproduce the above copyright
-#    notice, this list of conditions and the following disclaimer in the
-#    documentation and/or other materials provided with the distribution.
-#  * Neither the name of NVIDIA CORPORATION nor the names of its
-#    contributors may be used to endorse or promote products derived
-#    from this software without specific prior written permission.
-#
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ``AS IS'' AND ANY
-# EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
-# PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR
-# CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
-# EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
-# PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
-# PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
-# OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
--->
+# Optimized Stable Diffusion
 
-# Building Complex Pipelines: Stable Diffusion
-
-| Navigate to | [Part 5: Building Model Ensembles](../Part_5-Model_Ensembles/)  | [Documentation: BLS](https://github.com/triton-inference-server/python_backend#business-logic-scripting) |
-| ------------ | --------------- | --------------- |
-
-**Watch [this explainer video](https://youtu.be/JgP2WgNIq_w) with discusses the pipeline, before proceeding with the example**. This example focuses on showcasing two of Triton Inference Server's features:
-* Using multiple frameworks in the same inference pipeline. Refer [this for more information](https://github.com/triton-inference-server/backend#where-can-i-find-all-the-backends-that-are-available-for-triton) about supported frameworks.
-* Using the Python Backend's [Business Logic Scripting](https://github.com/triton-inference-server/python_backend#business-logic-scripting) API to build complex non linear pipelines.
-
-## Using Multiple Backends
-
-Building a pipeline powered by deep learning models is a collaborative effort which often involves multiple contributors. Contributors often have differing development environment. This can lead to issues whilst building a single pipeline with work from different contributors. Triton users can solve this challenge with the use of the Python or a C++ backend along with the Business Logic Scripting API (BLS) API to trigger model execution.
-
-![Pipeline](./img/multiple_backends.PNG)
-
-In this example, the models are being run on:
-* ONNX Backend
-* TensorRT Backend
-* Python Backend
-
-Both the models deployed on a framework backend can be triggered using the following API:
-```
-encoding_request = pb_utils.InferenceRequest(
-    model_name="text_encoder",
-    requested_output_names=["last_hidden_state"],
-    inputs=[input_ids_1],
-)
-
-response = encoding_request.exec()
-text_embeddings = pb_utils.get_output_tensor_by_name(response, "last_hidden_state")
-```
-
-Refer to `model.py` in the `pipeline` model for a complete example.
-
-## Stable Diffusion Example
-
+## Pipeline
 Before starting, clone this repository and navigate to the root folder. Use three different terminals for an easier user experience.
 
 ### Step 1: Prepare the Server Environment
