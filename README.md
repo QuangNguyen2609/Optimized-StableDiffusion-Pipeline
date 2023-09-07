@@ -2,7 +2,7 @@
 
 <div align="center">
 <p>
-    <img src='./assets/teaser.jpg' width=30% class="center">
+    <img src='teaser.jpg' width=30% class="center">
 </p>
 
 We introduce a complete pipeline from finetune to model optimization, finally deploying to the Cloud with a text-to-image Stable Diffusion.
