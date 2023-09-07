@@ -1,64 +1,39 @@
-# Optimized Stable Diffusion
+# Finetune, Optimize and Deploy with Stable Diffusion
 
-## Pipeline
-Before starting, clone this repository and navigate to the root folder. Use three different terminals for an easier user experience.
+<div align="center">
+<p>
+    <img src='./assets/teaser.jpg' width=30% class="center">
+</p>
 
-### Step 1: Prepare the Server Environment
-* First, run the Triton Inference Server Container.
-```
-# Replace yy.mm with year and month of release. Eg. 22.08
-docker run --gpus=all -it --shm-size=256m --rm -p8000:8000 -p8001:8001 -p8002:8002 -v ${PWD}:/workspace/ -v ${PWD}/model_repository:/models nvcr.io/nvidia/tritonserver:yy.mm-py3 bash
-```
-* Next, install all the dependencies required by the models running in the python backend and login with your [huggingface token](https://huggingface.co/settings/tokens)(Account on [HuggingFace](https://huggingface.co/) is required).
+We introduce a complete pipeline from finetune to model optimization, finally deploying to the Cloud with a text-to-image Stable Diffusion.
 
-```
-# PyTorch & Transformers Lib
-pip install torch torchvision torchaudio
-pip install transformers ftfy scipy accelerate
-pip install diffusers==0.9.0
-pip install transformers[onnxruntime]
-huggingface-cli login
-```
+</div>
 
-### Step 2: Exporting and converting the models
-Use the NGC PyTorch container, to export and convert the models.
 
-```
-docker run -it --gpus all -p 8888:8888 -v ${PWD}:/mount nvcr.io/nvidia/pytorch:yy.mm-py3
+Authors:
+- Khoi Nguyen: [zero-nnkn](https://github.com/zero-nnkn)
+- Dang Quang: [QuangNguyen2609](https://github.com/QuangNguyen2609)
 
-pip install transformers ftfy scipy
-pip install transformers[onnxruntime]
-pip install diffusers==0.9.0
-huggingface-cli login
-cd /mount
-python export.py
+Advisors:
+- Ba Ngoc: [bangoc123](https://github.com/bangoc123)
 
-# Accelerating VAE with TensorRT
-trtexec --onnx=vae.onnx --saveEngine=vae.plan --minShapes=latent_sample:1x4x64x64 --optShapes=latent_sample:4x4x64x64 --maxShapes=latent_sample:8x4x64x64 --fp16
+## 📝 Documentation
+### 1. [Finetuning](./finetuning/README.md)
+Currently, we investigate methods for finetuning Stable Diffusion with [🤗 diffuers](https://github.com/huggingface/diffusers).
 
-# Place the models in the model repository
-mkdir model_repository/vae/1
-mkdir model_repository/text_encoder/1
-mv vae.plan model_repository/vae/1/model.plan
-mv encoder.onnx model_repository/text_encoder/1/model.onnx
-```
+Due to hardware limitations, our finetune model cannot achieve the best results and is only to demonstrate the feasibility of these methods.
 
-### Step 3: Launch the Server
-From the server container, launch the Triton Inference Server.
-```
-tritonserver --model-repository=/models
-```
+### 2. [Optimization](./optimization/README.md)
+We have researched and applied the optimization methods from [🤗 diffuers](https://github.com/huggingface/diffusers)
+ and [🤗 optimum](https://github.com/huggingface/optimum).
 
-### Step 4: Run the client
-Use the client container and run the client.
-```
-docker run -it --net=host -v ${PWD}:/workspace/ nvcr.io/nvidia/tritonserver:yy.mm-py3-sdk bash
+### 3. [Deployment](./deployment/fastapi/README.md)
+We provided instructions to deploy Stable Diffusion pipeline on Google Cloud. Note that we are currently only deploying on CPU. Work with GPU is plan for future works.
 
-# Client with no GUI
-python3 client.py
 
-# Client with GUI
-pip install gradio packaging
-python3 gui/client.py --triton_url="localhost:8001"
-```
-Note: First Inference query may take more time than successive queries
+## ✔️ TODO
+- [ ] Build UI for Text-to-Image
+- [ ] Complete deployment with Triton Inference Server
+- [ ] Investigate and write reports for optimization methods in GPU
+- [ ] Evaluation of model quality
+
